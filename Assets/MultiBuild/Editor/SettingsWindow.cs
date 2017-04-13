@@ -210,11 +210,24 @@ namespace MultiBuild {
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Add")) {
                 // Ugh dealing with arrays in SerializedObject is awful
-                Target newTarget = TargetNameToValue[_targetNamesNotAdded[_targetToAddIndex]];
-                //int insertIndex = ~Settings.targets.BinarySearch(newTarget);
+                string newTargetName = _targetNamesNotAdded[_targetToAddIndex];
+                Target newTarget = TargetNameToValue[newTargetName];
+                // Insert in order
                 var proplist = SerializedSettings.FindProperty("targets");
+                int insertIndex;
+                for (insertIndex = 0; insertIndex < proplist.arraySize; ++insertIndex) {
+                    string name = TargetNames[(Target)proplist.GetArrayElementAtIndex(insertIndex).enumValueIndex];
+                    if (string.Compare(newTargetName, name, true) < 0) {
+                        break;
+                    }
+                }
                 proplist.arraySize++;
-                proplist.GetArrayElementAtIndex(proplist.arraySize-1).enumValueIndex = (int)newTarget;
+                // Move all existing items forward to make room for insert in order
+                for (int i = proplist.arraySize-1; i > insertIndex; --i) {
+                    proplist.GetArrayElementAtIndex(i).enumValueIndex =
+                        proplist.GetArrayElementAtIndex(i-1).enumValueIndex;
+                }
+                proplist.GetArrayElementAtIndex(insertIndex).enumValueIndex = (int)newTarget;
                 _targetsDirty = true;
             }
             GUILayout.FlexibleSpace();
@@ -227,7 +240,6 @@ namespace MultiBuild {
             EditorGUILayout.PropertyField(SerializedSettings.FindProperty("developmentBuild"));
 
             if (removeTargetAtEnd) {
-                // Can't really deal with this through SerializedProperty
                 int index = Settings.targets.IndexOf(targetToRemove);
                 var proplist = SerializedSettings.FindProperty("targets");
                 proplist.DeleteArrayElementAtIndex(index);
