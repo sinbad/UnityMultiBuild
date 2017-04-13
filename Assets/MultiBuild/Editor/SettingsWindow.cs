@@ -58,6 +58,21 @@ namespace MultiBuild {
                 return _targetNames;
             }
         }
+        // Because we need to sort and Unity Popup doesn't have a data tag
+        Dictionary<string, Target> _targetNameToValue;
+        Dictionary<string, Target> TargetNameToValue {
+            get {
+                if (_targetNameToValue == null) {
+                    _targetNameToValue = new Dictionary<string, Target>();
+                    foreach (var target in TargetNames.Keys) {
+                        _targetNameToValue[TargetNames[target]] = target;
+                    }
+                }
+                return _targetNameToValue;
+            }
+        }
+
+
 
         Target[] _targets;
         Target[] Targets {
@@ -100,7 +115,6 @@ namespace MultiBuild {
                 return _removeButtonContainerStyle;
             }
         }
-        List<Target> _targetsNotAdded;
         List<string> _targetNamesNotAdded;
         bool _targetsDirty = true;
         int _targetToAddIndex;
@@ -196,7 +210,7 @@ namespace MultiBuild {
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Add")) {
                 // Ugh dealing with arrays in SerializedObject is awful
-                Target newTarget = _targetsNotAdded[_targetToAddIndex];
+                Target newTarget = TargetNameToValue[_targetNamesNotAdded[_targetToAddIndex]];
                 //int insertIndex = ~Settings.targets.BinarySearch(newTarget);
                 var proplist = SerializedSettings.FindProperty("targets");
                 proplist.arraySize++;
@@ -237,14 +251,13 @@ namespace MultiBuild {
         }
 
         void UpdateTargetsNotAdded() {
-            _targetsNotAdded = new List<Target>();
             _targetNamesNotAdded = new List<string>();
             foreach (var target in Targets) {
                 if (!Settings.targets.Contains(target)) {
-                    _targetsNotAdded.Add(target);
                     _targetNamesNotAdded.Add(TargetNames[target]);
                 }
             }
+            _targetNamesNotAdded.Sort();
             _targetsDirty = false;
         }
 
