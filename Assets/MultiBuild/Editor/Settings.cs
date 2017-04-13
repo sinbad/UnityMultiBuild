@@ -16,7 +16,16 @@ namespace MultiBuild {
         Linux64 = 6,
         iOS = 7,
         Android = 8,
-        WebGL = 9
+        WebGL = 9,
+        WindowsStore = 10,
+        Tizen = 11,
+        PS4 = 12,
+        XboxOne = 13,
+        SamsungTV = 14,
+        Nintendo3DS = 15,
+        WiiU = 16,
+        tvOS = 17,
+        Switch = 18
     }
     public class Settings : ScriptableObject {
 

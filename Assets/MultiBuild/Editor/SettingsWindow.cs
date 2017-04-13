@@ -44,6 +44,15 @@ namespace MultiBuild {
                         {Target.WebGL, "WebGL"},
                         {Target.Windows32, "Windows 32-bit"},
                         {Target.Windows64, "Windows 64-bit"},
+                        {Target.WindowsStore, "Windows Store App"},
+                        {Target.Tizen, "Tizen"},
+                        {Target.PS4, "Playstation 4"},
+                        {Target.XboxOne, "Xbox One"},
+                        {Target.SamsungTV, "Samsung TV"},
+                        {Target.Nintendo3DS, "Nintendo 3DS"},
+                        {Target.WiiU, "Nintendo WiiU"},
+                        {Target.tvOS, "tvOS"},
+                        {Target.Switch, "Nintendo Switch"},
                     };
                 }
                 return _targetNames;
@@ -330,8 +339,26 @@ namespace MultiBuild {
                 return BuildTargetGroup.Android;
             case BuildTarget.WebGL:
                 return BuildTargetGroup.WebGL;
+            case BuildTarget.WSAPlayer:
+                return BuildTargetGroup.WSA;
+            case BuildTarget.Tizen:
+                return BuildTargetGroup.Tizen;
+            case BuildTarget.PS4:
+                return BuildTargetGroup.PS4;
+            case BuildTarget.XboxOne:
+                return BuildTargetGroup.XboxOne;
+            case BuildTarget.SamsungTV:
+                return BuildTargetGroup.SamsungTV;
+            case BuildTarget.N3DS:
+                return BuildTargetGroup.N3DS;
+            case BuildTarget.WiiU:
+                return BuildTargetGroup.WiiU;
+            case BuildTarget.tvOS:
+                return BuildTargetGroup.tvOS;
+            case BuildTarget.Switch:
+                return BuildTargetGroup.Switch;
 
-                // TODO more platforms
+                // TODO more platforms?
             default:
                 return BuildTargetGroup.Unknown;
             }
@@ -359,7 +386,25 @@ namespace MultiBuild {
                 return BuildTarget.Android;
             case Target.WebGL:
                 return BuildTarget.WebGL;
-                // TODO more platforms
+            case Target.WindowsStore:
+                return BuildTarget.WSAPlayer;
+            case Target.Tizen:
+                return BuildTarget.Tizen;
+            case Target.PS4:
+                return BuildTarget.PS4;
+            case Target.XboxOne:
+                return BuildTarget.XboxOne;
+            case Target.SamsungTV:
+                return BuildTarget.SamsungTV;
+            case Target.Nintendo3DS:
+                return BuildTarget.N3DS;
+            case Target.WiiU:
+                return BuildTarget.WiiU;
+            case Target.tvOS:
+                return BuildTarget.tvOS;
+            case Target.Switch:
+                return BuildTarget.Switch;
+                // TODO more platforms?
             default:
                 throw new NotImplementedException("Target not supported");
             }
