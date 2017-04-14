@@ -25,7 +25,9 @@ namespace MultiBuild {
         Nintendo3DS = 15,
         WiiU = 16,
         tvOS = 17,
+#if UNITY_5_6
         Switch = 18
+#endif
     }
     public class Settings : ScriptableObject {
 
@@ -34,8 +36,6 @@ namespace MultiBuild {
         public string overrideName;
         public bool developmentBuild;
         public List<Target> targets;
-
-
 
         public void Reset() {
             outputFolder = Directory.GetParent(Application.dataPath).FullName;

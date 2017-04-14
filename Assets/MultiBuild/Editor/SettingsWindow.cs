@@ -52,7 +52,9 @@ namespace MultiBuild {
                         {Target.Nintendo3DS, "Nintendo 3DS"},
                         {Target.WiiU, "Nintendo WiiU"},
                         {Target.tvOS, "tvOS"},
+#if UNITY_5_6
                         {Target.Switch, "Nintendo Switch"},
+#endif
                     };
                 }
                 return _targetNames;
@@ -380,9 +382,10 @@ namespace MultiBuild {
                 return BuildTargetGroup.WiiU;
             case BuildTarget.tvOS:
                 return BuildTargetGroup.tvOS;
+#if UNITY_5_6
             case BuildTarget.Switch:
                 return BuildTargetGroup.Switch;
-
+#endif
                 // TODO more platforms?
             default:
                 return BuildTargetGroup.Unknown;
@@ -427,8 +430,10 @@ namespace MultiBuild {
                 return BuildTarget.WiiU;
             case Target.tvOS:
                 return BuildTarget.tvOS;
+#if UNITY_5_6
             case Target.Switch:
                 return BuildTarget.Switch;
+#endif
                 // TODO more platforms?
             default:
                 throw new NotImplementedException("Target not supported");
