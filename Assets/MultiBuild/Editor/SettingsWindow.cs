@@ -343,9 +343,12 @@ namespace MultiBuild {
             // Building can change the active target, can cause warnings or odd behaviour
             // Put it back to how it was
             if (EditorUserBuildSettings.activeBuildTarget != savedTarget) {
+#if UNITY_5_6
                 EditorUserBuildSettings.SwitchActiveBuildTarget(GroupForTarget(savedTarget), savedTarget);
+#else
+                EditorUserBuildSettings.SwitchActiveBuildTarget(savedTarget);
+#endif     
             }
-
         }
 
         BuildTargetGroup GroupForTarget(BuildTarget t) {
