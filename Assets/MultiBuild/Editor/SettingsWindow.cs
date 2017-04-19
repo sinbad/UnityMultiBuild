@@ -5,6 +5,23 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+/* Easiest way to check if we're running 5.4 or lower. */
+#if UNITY_5_5_OR_NEWER
+#else
+namespace UnityEditor
+{
+	public struct BuildPlayerOptions
+	{
+		public string[] scenes { get; set; }
+		public string locationPathName { get; set; }
+		public string assetBundleManifestPath { get; set; }
+		public BuildTargetGroup targetGroup { get; set; }
+		public BuildTarget target { get; set; }
+		public BuildOptions options { get; set; }
+	}
+}
+#endif
+
 namespace MultiBuild {
     public class SettingsWindow : EditorWindow {
 
@@ -49,10 +66,12 @@ namespace MultiBuild {
                         {Target.PS4, "Playstation 4"},
                         {Target.XboxOne, "Xbox One"},
                         {Target.SamsungTV, "Samsung TV"},
-                        {Target.Nintendo3DS, "Nintendo 3DS"},
                         {Target.WiiU, "Nintendo WiiU"},
                         {Target.tvOS, "tvOS"},
-#if UNITY_5_6
+#if UNITY_5_5_OR_NEWER
+                        {Target.Nintendo3DS, "Nintendo 3DS"},
+#endif
+#if UNITY_5_6_OR_NEWER
                         {Target.Switch, "Nintendo Switch"},
 #endif
                     };
@@ -266,10 +285,10 @@ namespace MultiBuild {
 
         void UpdateTargetsNotAdded() {
             _targetNamesNotAdded = new List<string>();
-            foreach (var target in Targets) {
-                if (!Settings.targets.Contains(target)) {
+            for (int i = 0, n = (int)Target.Max; i < n; ++i) {
+                Target target = Targets[i];
+                if (!Settings.targets.Contains(target))
                     _targetNamesNotAdded.Add(TargetNames[target]);
-                }
             }
             _targetNamesNotAdded.Sort();
             _targetsDirty = false;
@@ -322,7 +341,15 @@ namespace MultiBuild {
                         cancelled = true;
                         break;
                 }
+#if UNITY_5_5_OR_NEWER
                 string err = BuildPipeline.BuildPlayer(opts);
+#else
+                string err = BuildPipeline.BuildPlayer(
+                        opts.scenes,
+                        opts.locationPathName,
+                        opts.target,
+                        opts.options);
+#endif
                 if (!string.IsNullOrEmpty(err)) {
                     EditorUtility.DisplayDialog("Build error", err, "Close");
                     break;
@@ -343,11 +370,11 @@ namespace MultiBuild {
             // Building can change the active target, can cause warnings or odd behaviour
             // Put it back to how it was
             if (EditorUserBuildSettings.activeBuildTarget != savedTarget) {
-#if UNITY_5_6
+#if UNITY_5_6_OR_NEWER
                 EditorUserBuildSettings.SwitchActiveBuildTarget(GroupForTarget(savedTarget), savedTarget);
 #else
                 EditorUserBuildSettings.SwitchActiveBuildTarget(savedTarget);
-#endif     
+#endif
             }
         }
 
@@ -379,13 +406,15 @@ namespace MultiBuild {
                 return BuildTargetGroup.XboxOne;
             case BuildTarget.SamsungTV:
                 return BuildTargetGroup.SamsungTV;
-            case BuildTarget.N3DS:
-                return BuildTargetGroup.N3DS;
             case BuildTarget.WiiU:
                 return BuildTargetGroup.WiiU;
             case BuildTarget.tvOS:
                 return BuildTargetGroup.tvOS;
-#if UNITY_5_6
+#if UNITY_5_5_OR_NEWER
+            case BuildTarget.N3DS:
+                return BuildTargetGroup.N3DS;
+#endif
+#if UNITY_5_6_OR_NEWER
             case BuildTarget.Switch:
                 return BuildTargetGroup.Switch;
 #endif
@@ -427,13 +456,15 @@ namespace MultiBuild {
                 return BuildTarget.XboxOne;
             case Target.SamsungTV:
                 return BuildTarget.SamsungTV;
-            case Target.Nintendo3DS:
-                return BuildTarget.N3DS;
             case Target.WiiU:
                 return BuildTarget.WiiU;
             case Target.tvOS:
                 return BuildTarget.tvOS;
-#if UNITY_5_6
+#if UNITY_5_5_OR_NEWER
+            case Target.Nintendo3DS:
+                return BuildTarget.N3DS;
+#endif
+#if UNITY_5_6_OR_NEWER
             case Target.Switch:
                 return BuildTarget.Switch;
 #endif
