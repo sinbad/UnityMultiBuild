@@ -68,9 +68,7 @@ namespace MultiBuild {
                         {Target.SamsungTV, "Samsung TV"},
                         {Target.WiiU, "Nintendo WiiU"},
                         {Target.tvOS, "tvOS"},
-#if UNITY_5_5_OR_NEWER
                         {Target.Nintendo3DS, "Nintendo 3DS"},
-#endif
 #if UNITY_5_6_OR_NEWER
                         {Target.Switch, "Nintendo Switch"},
 #endif
@@ -413,6 +411,9 @@ namespace MultiBuild {
 #if UNITY_5_5_OR_NEWER
             case BuildTarget.N3DS:
                 return BuildTargetGroup.N3DS;
+#else
+            case BuildTarget.Nintendo3DS:
+                return BuildTargetGroup.Nintendo3DS;
 #endif
 #if UNITY_5_6_OR_NEWER
             case BuildTarget.Switch:
@@ -463,6 +464,9 @@ namespace MultiBuild {
 #if UNITY_5_5_OR_NEWER
             case Target.Nintendo3DS:
                 return BuildTarget.N3DS;
+#else
+            case Target.Nintendo3DS:
+                return BuildTarget.Nintendo3DS;
 #endif
 #if UNITY_5_6_OR_NEWER
             case Target.Switch:
@@ -509,7 +513,6 @@ namespace MultiBuild {
 
             return o;
         }
-
     }
 
 }

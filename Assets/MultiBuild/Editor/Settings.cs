@@ -24,9 +24,7 @@ namespace MultiBuild {
         SamsungTV = 14,
         WiiU = 15,
         tvOS = 16,
-#if UNITY_5_5_OR_NEWER
         Nintendo3DS = 17,
-#endif
 #if UNITY_5_6_OR_NEWER
         Switch = 18,
 #endif
