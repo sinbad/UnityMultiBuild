@@ -22,13 +22,12 @@ namespace MultiBuild {
         PS4 = 12,
         XboxOne = 13,
         SamsungTV = 14,
-        WiiU = 15,
-        tvOS = 16,
-        Nintendo3DS = 17,
+        Nintendo3DS = 15,
+        WiiU = 16,
+        tvOS = 17,
 #if UNITY_5_6_OR_NEWER
         Switch = 18,
 #endif
-
         Max
     }
 
