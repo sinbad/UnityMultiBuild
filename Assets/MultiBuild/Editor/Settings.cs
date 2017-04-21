@@ -25,10 +25,12 @@ namespace MultiBuild {
         Nintendo3DS = 15,
         WiiU = 16,
         tvOS = 17,
-#if UNITY_5_6
-        Switch = 18
+#if UNITY_5_6_OR_NEWER
+        Switch = 18,
 #endif
+        Max
     }
+
     public class Settings : ScriptableObject {
 
         public string outputFolder;
