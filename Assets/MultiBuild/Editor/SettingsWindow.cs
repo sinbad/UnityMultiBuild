@@ -283,8 +283,7 @@ namespace MultiBuild {
 
         void UpdateTargetsNotAdded() {
             _targetNamesNotAdded = new List<string>();
-            for (int i = 0, n = (int)Target.Max; i < n; ++i) {
-                Target target = Targets[i];
+            foreach (Target target in Targets) {
                 if (!Settings.targets.Contains(target))
                     _targetNamesNotAdded.Add(TargetNames[target]);
             }

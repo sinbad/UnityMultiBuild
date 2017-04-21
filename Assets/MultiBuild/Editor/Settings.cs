@@ -28,7 +28,6 @@ namespace MultiBuild {
 #if UNITY_5_6_OR_NEWER
         Switch = 18,
 #endif
-        Max
     }
 
     public class Settings : ScriptableObject {
