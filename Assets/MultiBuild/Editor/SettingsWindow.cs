@@ -360,6 +360,7 @@ namespace MultiBuild {
                         break;
                 }
             }
+            EditorUtility.ClearProgressBar();
             if (cancelled) {
                 EditorUtility.DisplayDialog("Cancelled", "Build cancelled before finishing.", "Close");
             }
