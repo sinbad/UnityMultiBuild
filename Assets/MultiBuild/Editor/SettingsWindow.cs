@@ -369,7 +369,7 @@ namespace MultiBuild {
             // Put it back to how it was
             if (EditorUserBuildSettings.activeBuildTarget != savedTarget) {
 #if UNITY_5_6_OR_NEWER
-                EditorUserBuildSettings.SwitchActiveBuildTarget(GroupForTarget(savedTarget), savedTarget);
+                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(GroupForTarget(savedTarget), savedTarget);
 #else
                 EditorUserBuildSettings.SwitchActiveBuildTarget(savedTarget);
 #endif
