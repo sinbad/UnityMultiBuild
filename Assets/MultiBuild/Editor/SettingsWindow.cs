@@ -25,29 +25,10 @@ namespace UnityEditor
 namespace MultiBuild {
     public class SettingsWindow : EditorWindow {
 
-        Settings _settings;
-        Settings Settings {
-            get {
-                if (_settings == null) {
-                    _settings = LoadOrCreateSettings();
-                }
-                return _settings;
-            }
-        }
-        SerializedObject _serializedSettings;
-        SerializedObject SerializedSettings {
-            get {
-                if (_serializedSettings == null) {
-                    _serializedSettings = new SerializedObject(Settings);
-                }
-                return _serializedSettings;
-            }
-        }
-
         // Manually format the descriptive names
         // Simpler than DescriptionAttribute style IMO
-        Dictionary<Target, string> _targetNames;
-        Dictionary<Target, string> TargetNames {
+        static Dictionary<Target, string> _targetNames;
+        public static Dictionary<Target, string> TargetNames {
             get {
                 if (_targetNames == null) {
                     _targetNames = new Dictionary<Target, string> {
@@ -59,9 +40,9 @@ namespace MultiBuild {
                         {Target.Mac64, "Mac 64-bit"},
                         {Target.MacUniversal, "Mac Universal"},
                         {Target.WebGL, "WebGL"},
-                        {Target.Windows32, "Windows 32-bit"},
-                        {Target.Windows64, "Windows 64-bit"},
-                        {Target.WindowsStore, "Windows Store App"},
+                        {Target.Win32, "Windows 32-bit"},
+                        {Target.Win64, "Windows 64-bit"},
+                        {Target.WinStore, "Windows Store App"},
                         {Target.Tizen, "Tizen"},
                         {Target.PS4, "Playstation 4"},
                         {Target.XboxOne, "Xbox One"},
@@ -77,6 +58,26 @@ namespace MultiBuild {
                 return _targetNames;
             }
         }
+
+        Settings _settings;
+        Settings Settings {
+            get {
+                if (_settings == null) {
+                    _settings = Storage.LoadOrCreateSettings();
+                }
+                return _settings;
+            }
+        }
+        SerializedObject _serializedSettings;
+        SerializedObject SerializedSettings {
+            get {
+                if (_serializedSettings == null) {
+                    _serializedSettings = new SerializedObject(Settings);
+                }
+                return _serializedSettings;
+            }
+        }
+
         // Because we need to sort and Unity Popup doesn't have a data tag
         Dictionary<string, Target> _targetNameToValue;
         Dictionary<string, Target> TargetNameToValue {
@@ -137,13 +138,6 @@ namespace MultiBuild {
         List<string> _targetNamesNotAdded;
         bool _targetsDirty = true;
         int _targetToAddIndex;
-
-        string SettingsFilePath {
-            get {
-                // Assets always use forward slashes even on Windows
-                return "Assets/MultiBuild/MultiBuildSettings.asset";
-            }
-        }
 
         [MenuItem ("Tools/MultiBuild...")]
         public static void  ShowWindow () {
@@ -291,77 +285,31 @@ namespace MultiBuild {
             _targetsDirty = false;
         }
 
-        Settings LoadOrCreateSettings() {
-
-            // try to load first
-            Settings s = AssetDatabase.LoadAssetAtPath(SettingsFilePath, typeof(Settings)) as Settings;
-
-            if (s == null) {
-                // Create new
-                s = ScriptableObject.CreateInstance<Settings>();
-                s.Reset();
-                // Should not save during play, probably won't happen but check
-                if (EditorApplication.isPlayingOrWillChangePlaymode) {
-                    EditorApplication.delayCall += () => SaveNewSettingsAsset(s);
-                } else {
-                    SaveNewSettingsAsset(s);
-                }
-            }
-            return s;
-        }
-
-        void SaveNewSettingsAsset(Settings s) {
-            string f = SettingsFilePath;
-            string dir = Path.GetDirectoryName(f);
-            if(!Directory.Exists(dir)){
-                Directory.CreateDirectory(dir);
-            }
-            AssetDatabase.CreateAsset(s, f);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            // After this the settings asset is saved with other assets
-        }
-
         void Build() {
 
             var savedTarget = EditorUserBuildSettings.activeBuildTarget;
 
-            var buildSteps = SelectedBuildOptions();
-            int i = 1;
-            bool cancelled = false;
-            foreach (var opts in buildSteps) {
-                if (EditorUtility.DisplayCancelableProgressBar(
-                    "Building platforms...",
-                    string.Format("Building {0}...", opts.target.ToString()),
-                    (float)(i / (float)buildSteps.Count))) {
-                        cancelled = true;
-                        break;
-                }
-#if UNITY_5_5_OR_NEWER
-                string err = BuildPipeline.BuildPlayer(opts);
-#else
-                string err = BuildPipeline.BuildPlayer(
-                        opts.scenes,
-                        opts.locationPathName,
-                        opts.target,
-                        opts.options);
-#endif
-                if (!string.IsNullOrEmpty(err)) {
-                    EditorUtility.DisplayDialog("Build error", err, "Close");
-                    break;
-                }
-                ++i;
-                if (EditorUtility.DisplayCancelableProgressBar(
-                    "Building platforms...",
-                    string.Format("Building {0} Done", opts.target.ToString()),
-                    (float)(i / (float)buildSteps.Count))) {
-                        cancelled = true;
-                        break;
-                }
+            bool ok = true;
+            try {
+                ok = Builder.Build(Settings, (opts, progress, done) => {
+                    string message = done ?
+                        string.Format("Building {0} Done", opts.target.ToString()) :
+                        string.Format("Building {0}...", opts.target.ToString());
+                    if (EditorUtility.DisplayCancelableProgressBar(
+                        "Building project...",
+                        message,
+                        progress)) {
+                            return false; // cancel
+                    }
+                    return true;
+                });
+            } catch (Exception e) {
+                EditorUtility.DisplayDialog("Build error", e.Message, "Close");
+                ok = false;
             }
+
             EditorUtility.ClearProgressBar();
-            if (cancelled) {
+            if (!ok) {
                 EditorUtility.DisplayDialog("Cancelled", "Build cancelled before finishing.", "Close");
             }
 
@@ -369,150 +317,13 @@ namespace MultiBuild {
             // Put it back to how it was
             if (EditorUserBuildSettings.activeBuildTarget != savedTarget) {
 #if UNITY_5_6_OR_NEWER
-                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(GroupForTarget(savedTarget), savedTarget);
+                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(Builder.GroupForTarget(savedTarget), savedTarget);
 #else
                 EditorUserBuildSettings.SwitchActiveBuildTarget(savedTarget);
 #endif
             }
         }
 
-        BuildTargetGroup GroupForTarget(BuildTarget t) {
-            // Can't believe Unity doesn't have a method for this already
-            switch (t) {
-            case BuildTarget.StandaloneLinux:
-            case BuildTarget.StandaloneLinux64:
-            case BuildTarget.StandaloneLinuxUniversal:
-            case BuildTarget.StandaloneOSXIntel:
-            case BuildTarget.StandaloneOSXIntel64:
-            case BuildTarget.StandaloneOSXUniversal:
-            case BuildTarget.StandaloneWindows:
-            case BuildTarget.StandaloneWindows64:
-                return BuildTargetGroup.Standalone;
-            case BuildTarget.iOS:
-                return BuildTargetGroup.iOS;
-            case BuildTarget.Android:
-                return BuildTargetGroup.Android;
-            case BuildTarget.WebGL:
-                return BuildTargetGroup.WebGL;
-            case BuildTarget.WSAPlayer:
-                return BuildTargetGroup.WSA;
-            case BuildTarget.Tizen:
-                return BuildTargetGroup.Tizen;
-            case BuildTarget.PS4:
-                return BuildTargetGroup.PS4;
-            case BuildTarget.XboxOne:
-                return BuildTargetGroup.XboxOne;
-            case BuildTarget.SamsungTV:
-                return BuildTargetGroup.SamsungTV;
-            case BuildTarget.WiiU:
-                return BuildTargetGroup.WiiU;
-            case BuildTarget.tvOS:
-                return BuildTargetGroup.tvOS;
-#if UNITY_5_5_OR_NEWER
-            case BuildTarget.N3DS:
-                return BuildTargetGroup.N3DS;
-#else
-            case BuildTarget.Nintendo3DS:
-                return BuildTargetGroup.Nintendo3DS;
-#endif
-#if UNITY_5_6_OR_NEWER
-            case BuildTarget.Switch:
-                return BuildTargetGroup.Switch;
-#endif
-                // TODO more platforms?
-            default:
-                return BuildTargetGroup.Unknown;
-            }
-        }
-
-        BuildTarget UnityTarget(Target t) {
-            switch (t) {
-            case Target.Windows32:
-                return BuildTarget.StandaloneWindows;
-            case Target.Windows64:
-                return BuildTarget.StandaloneWindows64;
-            case Target.Mac32:
-                return BuildTarget.StandaloneOSXIntel;
-            case Target.Mac64:
-                return BuildTarget.StandaloneOSXIntel64;
-            case Target.MacUniversal:
-                return BuildTarget.StandaloneOSXUniversal;
-            case Target.Linux32:
-                return BuildTarget.StandaloneLinux;
-            case Target.Linux64:
-                return BuildTarget.StandaloneLinux64;
-            case Target.iOS:
-                return BuildTarget.iOS;
-            case Target.Android:
-                return BuildTarget.Android;
-            case Target.WebGL:
-                return BuildTarget.WebGL;
-            case Target.WindowsStore:
-                return BuildTarget.WSAPlayer;
-            case Target.Tizen:
-                return BuildTarget.Tizen;
-            case Target.PS4:
-                return BuildTarget.PS4;
-            case Target.XboxOne:
-                return BuildTarget.XboxOne;
-            case Target.SamsungTV:
-                return BuildTarget.SamsungTV;
-            case Target.WiiU:
-                return BuildTarget.WiiU;
-            case Target.tvOS:
-                return BuildTarget.tvOS;
-#if UNITY_5_5_OR_NEWER
-            case Target.Nintendo3DS:
-                return BuildTarget.N3DS;
-#else
-            case Target.Nintendo3DS:
-                return BuildTarget.Nintendo3DS;
-#endif
-#if UNITY_5_6_OR_NEWER
-            case Target.Switch:
-                return BuildTarget.Switch;
-#endif
-                // TODO more platforms?
-            default:
-                throw new NotImplementedException("Target not supported");
-            }
-        }
-
-        public List<BuildPlayerOptions> SelectedBuildOptions() {
-            var ret = new List<BuildPlayerOptions>();
-            foreach (var target in Settings.targets) {
-                ret.Add(BuildOpts(target));
-            }
-            return ret;
-        }
-
-        public BuildPlayerOptions BuildOpts(Target target) {
-            BuildPlayerOptions o = new BuildPlayerOptions();
-            // Build all the scenes selected in build settings
-            o.scenes = EditorBuildSettings.scenes
-                .Where(x => x.enabled)
-                .Select(x => x.path)
-                .ToArray();
-            string subfolder = TargetNames[target];
-            o.locationPathName = Path.Combine(Settings.outputFolder, subfolder);
-            // location needs to include the output name too
-            if (Settings.useProductName)
-                o.locationPathName = Path.Combine(o.locationPathName, PlayerSettings.productName);
-            else
-                o.locationPathName = Path.Combine(o.locationPathName, Settings.overrideName);
-            // Need to append exe in Windows, isn't added by default
-            // Weirdly .app is added automatically for Mac
-            if (target == Target.Windows32 || target == Target.Windows64)
-                o.locationPathName += ".exe";
-
-            o.target = UnityTarget(target);
-            BuildOptions opts = BuildOptions.None;
-            if (Settings.developmentBuild)
-                opts |= BuildOptions.Development;
-            o.options = opts;
-
-            return o;
-        }
     }
 
 }

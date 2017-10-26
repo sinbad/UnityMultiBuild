@@ -7,12 +7,38 @@ at once.
 
 ![Screenshot](multibuild.png)
 
-## How to use
+## How to use (Interactive)
 
 1. From the menu, click `Tools` > `MultiBuild...`
 1. Choose a base output folder (each platform will build into a subfolder)
 1. Add the platforms you want to build for
 1. Click the green build button
+
+## How to use (Command line)
+
+### Option 1: Build using all settings last saved in UI
+
+```
+Unity -quit -batchmode -executeMethod MultiBuild.Builder.Build
+```
+
+This invokes MultiBuild using all the settings you specified when you last used
+the UI (you have to have used it at least once or this will fail). Includes
+the output folder, the targets you picked, and whether it was development mode etc.
+
+### Option 2: Build using settings specified on command line
+
+```
+Unity -quit -batchmode -executeMethod MultiBuild.Builder.BuildCommandLine <outputFolder> <is_dev> <targetName> [targetName...]
+```
+
+In this mode you specify the output folder, whether to build in development mode
+(just a 'true' or 'false'), and a list of targets, which must match the
+entries in the `Target` enum in [Settings.cs](Assets/MultiBuild/Editor/Settings.cs),
+e.g. "Win64".
+
+This mode is useful because there is no standard way to build a development mode player
+in Unity from the command line right now.
 
 ## More details
 
@@ -27,14 +53,14 @@ at once.
 ## Why?
 
 I often build for several platforms and found it tedious to keep switching in
-the Build Settings window.
+the Build Settings window. It was useful to me to be able to build both with
+the Unity editor still open (you can't use the command line build when it's open),
+and to be able to use the saved settings from the command line.
 
-My first thought was to script it using the command line interface, but you can't
-run a build of the current project if it's still open in the editor. It's
-annoying to have to close Unity to do a build.
-
-All the solutions I found were either scripted outside as above or commercial.
-So I made a small open source version for myself &amp; others.
+Even if you use the full command line mode where you specify all the targets, it's
+simpler when using a lot of targets (shared base folder, automatic subfolders),
+plus you can also change the "Development mode" flag with this tool, which you
+cannot with the vanilla Unity command line build.
 
 ## Contributing
 

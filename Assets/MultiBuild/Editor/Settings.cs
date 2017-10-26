@@ -7,8 +7,8 @@ namespace MultiBuild {
     // Our own enumeration of targets so we can serialize with confidence
     // in case Unity changes the values of their internal targets
     public enum Target {
-        Windows32 = 0,
-        Windows64 = 1,
+        Win32 = 0,
+        Win64 = 1,
         Mac32 = 2,
         Mac64 = 3,
         MacUniversal = 4,
@@ -17,7 +17,7 @@ namespace MultiBuild {
         iOS = 7,
         Android = 8,
         WebGL = 9,
-        WindowsStore = 10,
+        WinStore = 10,
         Tizen = 11,
         PS4 = 12,
         XboxOne = 13,
