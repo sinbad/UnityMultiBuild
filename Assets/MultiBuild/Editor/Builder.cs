@@ -130,9 +130,7 @@ namespace MultiBuild {
             case BuildTarget.StandaloneLinux:
             case BuildTarget.StandaloneLinux64:
             case BuildTarget.StandaloneLinuxUniversal:
-            case BuildTarget.StandaloneOSXIntel:
-            case BuildTarget.StandaloneOSXIntel64:
-            case BuildTarget.StandaloneOSXUniversal:
+            case BuildTarget.StandaloneOSX:
             case BuildTarget.StandaloneWindows:
             case BuildTarget.StandaloneWindows64:
                 return BuildTargetGroup.Standalone;
@@ -150,8 +148,6 @@ namespace MultiBuild {
                 return BuildTargetGroup.PS4;
             case BuildTarget.XboxOne:
                 return BuildTargetGroup.XboxOne;
-            case BuildTarget.SamsungTV:
-                return BuildTargetGroup.SamsungTV;
             case BuildTarget.WiiU:
                 return BuildTargetGroup.WiiU;
             case BuildTarget.tvOS:
@@ -179,12 +175,11 @@ namespace MultiBuild {
                 return BuildTarget.StandaloneWindows;
             case Target.Win64:
                 return BuildTarget.StandaloneWindows64;
+            case Target.Mac:
             case Target.Mac32:
-                return BuildTarget.StandaloneOSXIntel;
-            case Target.Mac64:
-                return BuildTarget.StandaloneOSXIntel64;
+                return BuildTarget.StandaloneOSX;
             case Target.MacUniversal:
-                return BuildTarget.StandaloneOSXUniversal;
+                return BuildTarget.StandaloneOSX;
             case Target.Linux32:
                 return BuildTarget.StandaloneLinux;
             case Target.Linux64:
@@ -203,8 +198,6 @@ namespace MultiBuild {
                 return BuildTarget.PS4;
             case Target.XboxOne:
                 return BuildTarget.XboxOne;
-            case Target.SamsungTV:
-                return BuildTarget.SamsungTV;
             case Target.WiiU:
                 return BuildTarget.WiiU;
             case Target.tvOS:

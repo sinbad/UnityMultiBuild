@@ -11,6 +11,7 @@ namespace MultiBuild {
         Win64 = 1,
         Mac32 = 2,
         Mac64 = 3,
+        Mac = 3, // now the default
         MacUniversal = 4,
         Linux32 = 5,
         Linux64 = 6,
