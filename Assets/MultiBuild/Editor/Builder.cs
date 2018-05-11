@@ -61,7 +61,7 @@ namespace MultiBuild {
                     try {
                         settings.developmentBuild = Boolean.Parse(args[i]);
                         stage++;
-                    } catch (FormatException e) {
+                    } catch (FormatException) {
                         throw new ArgumentException("Development build argument was not a valid boolean" + usage);
                     }
                     break;
@@ -70,7 +70,7 @@ namespace MultiBuild {
                     // all subsequent args should be targets
                     try {
                         settings.targets.Add((Target)Enum.Parse(typeof(Target), args[i]));
-                    } catch (ArgumentException e) {
+                    } catch (ArgumentException) {
                         throw new ArgumentException(string.Format("Invalid target '{0}'", args[i]));
                     }
                     break;
