@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using UnityEditor.Build.Reporting;
 
 namespace MultiBuild {
 
@@ -103,8 +104,11 @@ namespace MultiBuild {
                     !callback(opts, (float)(i / (float)buildSteps.Count), false)) {
                         return false; // cancelled
                 }
-#if UNITY_5_5_OR_NEWER
-                string err = BuildPipeline.BuildPlayer(opts);
+#if UNITY_2018_1_OR_NEWER
+                var report = BuildPipeline.BuildPlayer(opts);
+                string err = report.summary.result == BuildResult.Succeeded ? string.Empty : "See log";
+#elif UNITY_5_5_OR_NEWER
+                var err = BuildPipeline.BuildPlayer(opts);
 #else
                 string err = BuildPipeline.BuildPlayer(
                         opts.scenes,
