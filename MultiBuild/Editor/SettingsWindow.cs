@@ -240,7 +240,7 @@ namespace MultiBuild {
                     proplist.GetArrayElementAtIndex(i).enumValueIndex =
                         proplist.GetArrayElementAtIndex(i-1).enumValueIndex;
                 }
-                proplist.GetArrayElementAtIndex(insertIndex).enumValueIndex = (int)newTarget;
+                proplist.GetArrayElementAtIndex(insertIndex).enumValueIndex = (int)newTarget + 1;
                 _targetsDirty = true;
             }
             GUILayout.FlexibleSpace();
