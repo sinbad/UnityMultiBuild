@@ -1,0 +1,15 @@
+{
+    "name": "com.sinbad.unitymultibuild",
+    "version": "1.0.0",
+    "description": "Batch build for multiple platforms from within the Unity editor",
+    "displayName": "Unity MultiBuild",
+    "changelogUrl": "https://github.com/sinbad/UnityMultiBuild",
+    "documentationUrl": "https://github.com/sinbad/UnityMultiBuild",
+    "keywords": [
+        "build",
+        "buildtools",
+        "build tools",
+        "editor",
+        "editor scripts"
+    ]
+}
